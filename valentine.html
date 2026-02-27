@@ -1591,8 +1591,17 @@ function updateCountdown() {
     const currentTime = new Date();
     const diff = unlockTime - currentTime;
     
+    const countdownEl = document.getElementById("countdown");
+    const btn = document.getElementById("unlockBtn");
+    
     if (diff <= 0) {
-        document.getElementById("countdown").innerText = "🎉 TIME TO UNLOCK!";
+        if (countdownEl) countdownEl.innerText = "🎉 TIME TO UNLOCK!";
+        // Enable button when time arrives
+        if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
+        }
         if (canUnlock()) {
             unlock();
         }
@@ -1602,7 +1611,12 @@ function updateCountdown() {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         
-        document.getElementById("countdown").innerText = `${days}D ${hours}H ${minutes}M ${seconds}S`;
+        if (countdownEl) countdownEl.innerText = `${days}D ${hours}H ${minutes}M ${seconds}S`;
+        // Keep button disabled
+        if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+        }
     }
 }
 
@@ -1618,12 +1632,28 @@ function unlock() {
         document.getElementById("lockScreen").style.display = "none";
         document.getElementById("content").classList.add("active");
     } else {
-        alert("Not yet, my love! Wait until 12 PM on Feb 28th 💕");
+        alert("Not yet, my love! 💕 You have to wait until 12 PM on Feb 28th ✨");
+        // Re-disable button
+        const btn = document.getElementById("unlockBtn");
+        if (btn) btn.disabled = true;
     }
 }
 
-// BUTTON
-document.getElementById("unlockBtn").addEventListener("click", unlock);
+// BUTTON - with safety checks
+const unlockBtn = document.getElementById("unlockBtn");
+if (unlockBtn) {
+    // Initially disable if not time yet
+    if (!canUnlock()) {
+        unlockBtn.disabled = true;
+        unlockBtn.style.opacity = "0.5";
+        unlockBtn.style.cursor = "not-allowed";
+    }
+    unlockBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        unlock();
+    });
+}
 
 // Auto-unlock if time has passed
 if (canUnlock()) {
